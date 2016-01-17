@@ -12,6 +12,7 @@ print *, "test of maff"
 !print *, "2014-12-27: ", days1900(2014,12,27)
 
 call test_dates
+call test_sortd
 end program maff90
 
 subroutine test_dates
@@ -30,6 +31,31 @@ subroutine test_dates
         stop
      endif
   enddo
-  print *, "ok"
+  print *, "pass"
   
 end subroutine test_dates
+
+subroutine test_sortd
+  use maff
+  integer :: i, n
+  double precision, allocatable :: arr(:), res(:) ! res is known output
+  print *, "test_sortd"
+  open(unit = 24, file = 'xlsm/sort.txt')
+  read(unit=24, fmt = *) n
+  !print *, 'n=', n
+  allocate(arr(n), res(n))
+  !do i = 1, n
+  read(unit=24, fmt=*) arr, res
+  close(24)
+
+  call sortd(arr)
+  do i =1,n
+     if(arr(i).ne.res(i)) then
+        print *, "fail"
+        return
+     endif
+  enddo
+  print *, "pass"
+  
+     
+end subroutine test_sortd

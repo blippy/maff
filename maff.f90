@@ -1,6 +1,6 @@
 ! MODULE: maff
 ! DESCRIPTION:
-!> Mark's Arithmetic Fortran Formulas
+!> Mark's Algorithms For Fortran
 
 module maff
 implicit none
@@ -36,6 +36,25 @@ double precision function sgn(x)
   if(x.gt.0.0) sgn = 1.0
   if(x.lt.0.0) sgn = -1.0
 end function sgn
+
+!> sortd sort doubles in place
+!! Referenced from:
+!! http://rosettacode.org/wiki/Sorting_algorithms/Insertion_sort#Fortran
+PURE SUBROUTINE sortd(a)
+  double precision, INTENT(in out), DIMENSION(:) :: a
+  double precision :: temp
+  INTEGER :: i, j
+ 
+  DO i = 2, SIZE(a)
+     j = i - 1
+     temp = a(i)
+     DO WHILE (j>=1 .AND. a(j)>temp)
+        a(j+1) = a(j)
+        j = j - 1
+     END DO
+     a(j+1) = temp
+  END DO
+END SUBROUTINE sortd
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !! calendrical routines
