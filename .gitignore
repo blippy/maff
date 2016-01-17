@@ -1,0 +1,10 @@
+html/
+latex/
+man/
+xlsm/
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+maff
+*.mod
