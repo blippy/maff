@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.3.2)
 project(maff)
 enable_language (Fortran)
-add_executable(maff mafftest.f90 maff.f90)
+add_executable(maff mafftest.f90 maff.f90 quantile.f90)
 
 find_package(Doxygen)
 if(DOXYGEN_FOUND)

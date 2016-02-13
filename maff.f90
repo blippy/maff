@@ -60,6 +60,7 @@ END SUBROUTINE sortd
 !! calendrical routines
 
 
+!> leap year incrementing function
 function leapinc(y)
   integer:: y
   integer:: leapinc
@@ -73,6 +74,21 @@ function leapinc(y)
 end function leapinc
 
 
+!> cumulative day array.
+!! load arr with the cumulative days for the year
+subroutine cda(y, arr)
+  integer, intent(in):: y
+  integer, intent(out) :: arr(12)
+
+  integer :: days(12)
+  arr = days
+  if(leapinc(y).eq.1) arr(3:12) = 1 + arr(3:12)
+  !if (m .gt. 2) cumdays = cumdays + leapinc(y)
+  data days /0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334/
+end subroutine cda
+  
+
+
 integer function cumdays(y, m, d)
   ! 01-Jan returns the value 1
   !TODO test
@@ -80,18 +96,20 @@ integer function cumdays(y, m, d)
   integer y, m, d
   
   integer days(12)
+
+  call cda(y, days)
   cumdays = days(m) + d
-  if (m .gt. 2) cumdays = cumdays + leapinc(y)
-  data days /0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334/
+
   
 end function cumdays
 
 
-
-function days1900(y, m, d)
+!> days since 01-Jan-1900, where
+!! 1900-01-01 == 1
+function days1900(y, m, d) !result(integer)
   !TODO test
-  integer:: days1900
-  integer y, m, d
+  integer:: days1900 ! output
+  integer, intent(in) ::  y, m, d
   
   integer y1
   y1 = y - 1900
@@ -100,6 +118,30 @@ function days1900(y, m, d)
   days1900 = days1900 + cumdays(y, m, d)
   
 end function days1900
+
+!> convert as serial number i to integers (y, m , d) 
+!! TODO test
+!! should split some of this functionality out
+subroutine i2ymd(i, y, m, d)
+  integer, intent(in):: i
+  integer, intent(out):: y, m, d
+  !integer :: i2ymd ! result
+
+  integer :: i2, cum, cdays(12), j, by
+  !i2 = i + floor(1900.0d0 * 365.25d0)-1!  + 475 ! 475 = putative leap years up to 1900
+  y = floor(dble(i)/365.25) + 1900
+  call cda(y, cdays)
+
+  !by = days1900(y-1, 12, 31)!+1
+  by = days1900(y-1, 1, 1)!+1
+  cum = i - by
+  print *, cum, by
+  do j = 1, 12
+     if (cdays(j).lt.cum) m = j
+  enddo
+  d = cum - cdays(m)
+  !i2ymd = int_date(y , m, d)  
+end subroutine i2ymd
 
 function days_in_month(y, m)
   !TODO test
@@ -148,12 +190,27 @@ integer function str2days1900(str)
   str2days1900 = days1900(y,m,d)
 end function str2days1900
 
+!> Convert (y,m,d) into integer YYYYMMDD
 integer function int_date(y, m, d)
-  !convert (y,m,d) into integer YYYYMMDD
   integer, intent(in):: y,m,d
   int_date = (y * 100 + m)*100 +d
 end function int_date
 
+!> Convert integer YYYYMMDD into (y,m, d)
+!! TODO check. I think it might be wrong
+subroutine date_int(i, y, m, d)
+  integer, intent(in)::i
+  integer, intent(out):: y, m, d
+
+  double precision:: id
+  id = dble(i)
+  d = mod(i, 100)
+  m = floor(dble(mod(i, 10000))/100.0)
+  y = floor(dble(i)/10000.0)
+  !id = id - y * 1000
+  !m = floor((id - y * 1000) /100)
+  !d = i - floor(id/100000) * 100000
+end subroutine date_int
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !! finanical routines
