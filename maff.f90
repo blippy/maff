@@ -10,6 +10,12 @@ contains
 !! sundry mathematical routines
 
   !> @section sundry Sundry Mathematical routines
+
+logical  function tol4(a, b)
+    !within 4 decimal places
+    double precision :: a, b
+    tol4 = abs(a-b).le.(10.0d0**(-4.0d0))
+  end function tol4
   
 function modz(a, b)
   ! does a mod b = 0?
@@ -40,21 +46,62 @@ end function sgn
 !> sortd sort doubles in place
 !! Referenced from:
 !! http://rosettacode.org/wiki/Sorting_algorithms/Insertion_sort#Fortran
-PURE SUBROUTINE sortd(a)
+SUBROUTINE sortd(a)
   double precision, INTENT(in out), DIMENSION(:) :: a
   double precision :: temp
   INTEGER :: i, j
- 
+
+  !print *, "size a = ", size(a)
   DO i = 2, SIZE(a)
      j = i - 1
      temp = a(i)
-     DO WHILE (j>=1 .AND. a(j)>temp)
+     !DO WHILE (j>=1 .AND. a(j)>temp)
+     do
+        if (j.lt.1) goto 100
+        if(a(j).le.temp) goto 100
         a(j+1) = a(j)
         j = j - 1
      END DO
+100  continue
      a(j+1) = temp
   END DO
 END SUBROUTINE sortd
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! statistical routines
+
+!> calculates quantiles according to Excel interpolation formula
+! https://en.wikipedia.org/wiki/Quantile
+! assumes array is sorted
+
+double precision function quantile(arr, q)
+  double precision :: arr(:)
+  double precision :: q
+
+  double precision :: hd
+  integer :: hi
+
+  hd = (dble(size(arr))-1.0d0) * q + 1.0d0
+  hi = floor(hd)
+  if(q.eq.1.0d0) then
+     quantile = arr(size(arr))
+     return
+  endif
+  quantile = arr(hi) + (hd - dble(hi)) * (arr(hi+1) - arr(hi))
+  !integer:: idx0
+  !double precision :: didx0
+
+  !didx0 = (dble(size(arr))-1.0d0) * q + 1.0d0
+  !idx0 = ceiling(didx0)
+  !if(idx0.eq.didx0) then
+  !   quantile = arr(idx0)
+  !   return
+  !endif
+
+  !v1 = arr(idx0)
+  !v2 = arr(idx0+1)
+  !quantile = v1 * ? + v2 *
+  
+end function quantile
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !! calendrical routines
@@ -135,7 +182,7 @@ subroutine i2ymd(i, y, m, d)
   !by = days1900(y-1, 12, 31)!+1
   by = days1900(y-1, 1, 1)!+1
   cum = i - by
-  print *, cum, by
+  !print *, cum, by
   do j = 1, 12
      if (cdays(j).lt.cum) m = j
   enddo
