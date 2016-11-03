@@ -1,3 +1,4 @@
+** considered DEPRECATED as now part of cerbo**
 Generate Makefile:
   cmake .
 Generate executables and modules:
